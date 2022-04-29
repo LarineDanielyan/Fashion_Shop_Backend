@@ -10,15 +10,48 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Collections;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class ProductServiceImpl implements ProductService {
 
-
     @Autowired
     private ProductRepository productRepository;
+
+
+    /***
+     *
+     * @return all data from DB, if there is not any data will return empty List.
+     */
+    @Override
+    public List<Product> getAll() {
+        List<Product> all = productRepository.findAll();
+        Collections.reverse(all);
+        return all;
+//        return productRepository.findAll();
+    }
+
+    /***
+     *
+     * @return the product with provided ID
+     */
+
+
+//    /***
+//     *
+//     * @param anytext
+//     * @return
+//     */
+//
+//    @Override
+//    public List<Product> getByAnyText(String anytext) {
+//      List<Product> filter = getAll().stream().filter((item)->
+//                     item.toString().toLowerCase(Locale.ROOT).contains(anytext.toLowerCase(Locale.ROOT)))
+//                .collect(Collectors.toList());
+//        return filter;
+//    }
 
     /***
      *
@@ -30,30 +63,14 @@ public class ProductServiceImpl implements ProductService {
         return productRepository.save(product);
     }
 
-    /***
-     *
-     * @param id with the help of it will find the object from DB.
-     * @return returns founded object or throws @ResponseStatusException(BAD_REQUEST).
-     */
     @Override
     public Product getById(long id) {
-        return productRepository
-                .findById(id)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.BAD_REQUEST,
-                        "product with id:" + id + "  not found in database")
-                );
+        return productRepository.findById(id).orElseThrow(()->{
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "product with id:" + id + "  not found in database");
+        });
     }
 
-    /***
-     *
-     * @return all data from DB, if there is not any data will return empty List.
-     */
-    @Override
-    public List<Product> getAll() {
-        return productRepository
-                .findAll();
-    }
 
     /***
      *
@@ -61,35 +78,29 @@ public class ProductServiceImpl implements ProductService {
      * @param product is changed data
      * @returns just updated product
      */
-
-    @Transactional
     @Override
+    @Transactional
     public Product update(long id, Product product) {
-        Product fromDb = productRepository
-                .findById(id)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.BAD_REQUEST,
-                        "product with id:" + id + "  not found in database")
-                );
-        fromDb.setName(product.getName());
-        fromDb.setPrice(product.getPrice());
-        fromDb.setCurrency(product.getCurrency());
-        fromDb.setDescription(product.getDescription());
-        fromDb.setStock(product.getStock());
-        return fromDb;
+        Product dbProduct = productRepository.findById(id).orElseThrow(()->{
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "product with id:" + id + "  not found in database");
+        });
+        dbProduct.setName(product.getName());
+        dbProduct.setPrice(product.getPrice());
+        dbProduct.setStock(product.getStock());
+//        dbProduct.setImg(product.getImg());//???????????
+        dbProduct.setCurrency(product.getCurrency());
+        dbProduct.setDescription(product.getDescription());
+        return  dbProduct;
     }
 
-    /**
-     * @param id need to delete
-     *           after deleting product from table,
-     *           it automatically deletes all related information from other tables
+    /***
+     *
+     * @param id find the product with provided id and deletes both the image folder
+     *           corresponding to the product and the product
      */
-
     @Override
     public void delete(long id) {
         productRepository.deleteById(id);
     }
-
-
 }
-

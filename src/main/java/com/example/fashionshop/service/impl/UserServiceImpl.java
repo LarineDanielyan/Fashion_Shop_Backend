@@ -11,10 +11,9 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
-
 @Service
 @RequiredArgsConstructor
-public class UserServiceImpl implements UserService {
+public class UserServiceImpl  implements UserService {
 
     @Autowired
     private UserRepository userRepository;
@@ -36,15 +35,28 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public User getById(String id) {
-        return userRepository.findById(id).orElseThrow(() -> new ResponseStatusException(
-                HttpStatus.UNAUTHORIZED,
-                "user with id:" + id + " not founded"));
+        return userRepository.findById(id).orElseThrow(()->{
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
+                    "user with id:" + id + "not founded");
+        });
+
     }
 
     @Override
-    public User getByIdForSingUp(String id) {
-        return userRepository.getById(id);
+    public boolean isExists(String id) {
+       return userRepository.findById(id).isPresent();
     }
+
+
+
+    /***
+     *
+     * @return the user with
+     */
+//    @Override
+//    public User getByIdForSignUp(String id) {
+//        return userRepository.getById(id);
+//    }
 
     /***
      *
